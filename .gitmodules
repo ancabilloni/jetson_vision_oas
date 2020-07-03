@@ -1,0 +1,3 @@
+[submodule "lidarLite"]
+	path = lidarLite
+	url = https://github.com/ancabilloni/LIDARLite_RaspberryPi_Library
