@@ -1,0 +1,8 @@
+# C++
+*.o
+
+# Python
+__pycache__
+
+# Complied
+bin/
