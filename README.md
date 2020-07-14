@@ -13,7 +13,7 @@ Read more on SSD MobileNet [here](https://honingds.com/blog/ssd-single-shot-obje
 A version of SSD_MobileNet_V2_COCO is provided in **ssd_mobilenet_v2_coco** folder. 
 
 ## Set-up Requirement
-Refer to [Jetpack-TF Installation Guide](./jetpack_installation.md)
+Refer to [Jetpack-TF Installation Guide](./jetpack_tf_installation.md)
 
 ## Build
 #### a. Create Inference Engine with Python
@@ -25,9 +25,9 @@ This file is only needed to generated once unless using new frozen model or chan
 - This script reads live images from webcam and draw bounding box in detected object to display. The SSD_MobileNet_V2_COCO can detect up to 91 categories, but the interested categories are limited to ['person', 'car', 'bus', 'truck']. See `object_detection/coco_classes.py` for more info. 
 
 ## References
-[Tensorrt Document](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html)
-https://github.com/opencv/opencv/issues/15074
-https://github.com/AastaNV/TRT_object_detection
-https://github.com/jkjung-avt/tensorrt_demos
-https://jkjung-avt.github.io/jetpack-4.4/
-Local tensorrt sample from Jetpack-4.4: /usr/src/tensorrt/samples/python/uff_ssd
+- [Tensorrt Document](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html)
+- https://github.com/opencv/opencv/issues/15074
+- https://github.com/AastaNV/TRT_object_detection
+- https://github.com/jkjung-avt/tensorrt_demos
+- https://jkjung-avt.github.io/jetpack-4.4/
+- Local tensorrt sample from Jetpack-4.4: /usr/src/tensorrt/samples/python/uff_ssd
