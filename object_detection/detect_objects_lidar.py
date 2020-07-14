@@ -16,7 +16,6 @@ import zmq
 
 
 DIR_NAME = os.path.dirname(__file__)
-LIB_FILE = os.path.abspath(os.path.join(DIR_NAME,'lib','libflattenconcat.so'))
 ENGINE_FILE = os.path.abspath(os.path.join(
                 DIR_NAME, 
                 'ssd_mobilenet_v2_coco', 
@@ -73,13 +72,6 @@ def main():
     topic = "cam"
     pub = ctx.socket(zmq.PUB)
     pub.bind("tcp://*:5563")
-
-
-    try:
-        ctypes.CDLL(LIB_FILE)
-    except:
-        print ("Something happened. Cannot load libflattenconcat.so. Exitting")
-        sys.exit(1)
 
     # initialize
     TRT_LOGGER = trt.Logger(trt.Logger.INFO)

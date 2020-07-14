@@ -13,13 +13,13 @@ import ctypes
 import uff
 import tensorrt as trt
 import graphsurgeon as gs
+import tensorflow as tf
 
 
 DIR_NAME = os.path.dirname(__file__)
-LIB_FILE = os.path.abspath(os.path.join(DIR_NAME,'lib','libflattenconcat.so'))
 MODEL_SPECS = {
     'ssd_mobilenet_v2_coco': {
-        'input_pb':   os.path.abspath(os.path.join(DIR_NAME, 'ssd_mobilenet_v2_coco', 'frozen_inference_graph.pb')),
+        'input_pb':   os.path.abspath(os.path.join(DIR_NAME, 'ssd_mobilenet_v2_coco', 'ssd_mobilenet_v2_coco.pb')),
         'tmp_uff':    os.path.abspath(os.path.join(DIR_NAME, 'ssd_mobilenet_v2_coco', 'tmp.uff')),
         'output_bin': os.path.abspath(os.path.join(DIR_NAME, 'ssd_mobilenet_v2_coco', 'TRT_ssd_mobilenet_v2_coco.bin')),
         'num_classes': 91,
@@ -42,6 +42,7 @@ def add_plugin(graph, spec):
     Input = gs.create_plugin_node(
         name="Input",
         op="Placeholder",
+        dtype=tf.float32,
         shape= (1,) + INPUT_DIMS
     )
 
@@ -75,17 +76,24 @@ def add_plugin(graph, spec):
     concat_priorbox = gs.create_node(
         "concat_priorbox",
         op="ConcatV2",
+        dtype=tf.float32,
         axis=2
     )
 
     concat_box_loc = gs.create_plugin_node(
         "concat_box_loc",
-        op="FlattenConcat_TRT"
+        op="FlattenConcat_TRT",
+        dtype=tf.float32,
+        axis=1,
+        ignoreBatch=0
     )
 
     concat_box_conf = gs.create_plugin_node(
         "concat_box_conf",
-        op="FlattenConcat_TRT"
+        op="FlattenConcat_TRT",
+        dtype=tf.float32,
+        axis=1,
+        ignoreBatch=0
     )
 
     namespace_plugin_map = {
@@ -107,8 +115,6 @@ def add_plugin(graph, spec):
 
 
 def main():
-    # initialize
-    ctypes.CDLL(LIB_FILE)
     TRT_LOGGER = trt.Logger(trt.Logger.INFO)
     trt.init_libnvinfer_plugins(TRT_LOGGER, '')
 
@@ -127,11 +133,15 @@ def main():
         parser.register_input('Input', INPUT_DIMS)
         parser.register_output('MarkOutput_0')
         parser.parse(spec['tmp_uff'], network)
+
+        print("Building Tensorrt engine. This may take a few minutes.")
+
         engine = builder.build_cuda_engine(network)
 
         buf = engine.serialize()
         with open(spec['output_bin'], 'wb') as f:
             f.write(buf)
+            print("Save engine.")
 
 
 if __name__ == '__main__':

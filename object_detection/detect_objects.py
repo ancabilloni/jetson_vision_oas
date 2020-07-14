@@ -15,7 +15,6 @@ import struct
 
 
 DIR_NAME = os.path.dirname(__file__)
-LIB_FILE = os.path.abspath(os.path.join(DIR_NAME,'lib','libflattenconcat.so'))
 ENGINE_FILE = os.path.abspath(os.path.join(
                 DIR_NAME, 
                 'ssd_mobilenet_v2_coco', 
@@ -45,7 +44,7 @@ def draw_text(img, text, topleft, color):
     return img
 
 
-def draw_boxes(img, boxes, conf, clss):
+def draw_boxes(img, boxes, conf, clss, fps):
     for bb, cf, cl in zip(boxes, conf, clss):
         cl = int(cl)
         x_min, y_min, x_max, y_max = bb
@@ -53,18 +52,12 @@ def draw_boxes(img, boxes, conf, clss):
         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), color, 2)
         txt_loc = (max(x_min+2, 0),max(y_min+15,0))
         cls_name = COCO_CLASSES_NAME[cl]
-        txt = '{} {:.2f}'.format(cls_name, cf)
+        txt = '{} {:.2f}. {:.1f} FPS'.format(cls_name, cf, fps)
         img = draw_text(img, txt, txt_loc, color)
     return img
 
 
 def main():
-    try:
-        ctypes.CDLL(LIB_FILE)
-    except:
-        print ("Something happened. Cannot load libflattenconcat.so. Exitting")
-        sys.exit(1)
-
     # initialize
     TRT_LOGGER = trt.Logger(trt.Logger.INFO)
     trt.init_libnvinfer_plugins(TRT_LOGGER, '')
@@ -97,10 +90,16 @@ def main():
             cuda_outputs.append(cuda_mem)
     context = engine.create_execution_context()
 
-    cap = cv2.VideoCapture(0)
+    # Activate webcam
+    if (cv2.__version__ == '4.1.1'): # slow issue on this version https://github.com/opencv/opencv/issues/15074
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L)
+    else:
+        cap = cv2.VideoCapture(0)
+
     t_start = time.time()
+    fps = 0.0
     while True:
-        ret, image = cap.read()
+        ret, image = cap.read() 
         img_resized = preprocess_img(image)
 
         np.copyto(host_inputs[0], img_resized.ravel())
@@ -134,13 +133,14 @@ def main():
             boxes.append([xmin, ymin, xmax, ymax])
             confs.append(conf)
             clss.append(label)
-        img = draw_boxes(image, boxes, confs, clss)
-
-        cv2.imshow('TRT_DEMO', img)
+        
         # Calculate FPS
         t_end = time.time()
         curr_fps = 1.0/(t_end - t_start)
-        fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps(0.05))
+        fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
+
+        img = draw_boxes(image, boxes, confs, clss, fps)
+        cv2.imshow('TRT_DEMO', img)
         t_start = t_end
 
         # End Program
