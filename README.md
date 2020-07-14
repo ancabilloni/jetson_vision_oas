@@ -6,7 +6,7 @@ The goal of this project is to implement object detection using deep learning mo
 In order to optimize detection speed, TensorRT (inference optimizer and runtime engine) is implemented to take advantage of the embedded GPU from Jetson boards. [TensorRT Document](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#:~:text=Figure%201.,power%20efficiency%2C%20and%20memory%20consumption.) 
 
 ## Model
-The detection model used in this project is **SSD MobileNet V2 Coco** that can be downloaded from [Tensorflow Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md)
+The detection model used in this project is **SSD MobileNet V2 Coco** that can be downloaded from [Tensorflow 1.x Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md)
 
 Read more on SSD MobileNet [here](https://honingds.com/blog/ssd-single-shot-object-detection-mobilenet-opencv/)
 
